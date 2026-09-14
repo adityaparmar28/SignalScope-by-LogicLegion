@@ -1,12 +1,47 @@
-# 🔍 SignalScope
+# 🔍 SignalScope by Logic Legion
 
 **Telling Real From Synthetic in the Age of Generative Media**
 
-> SIH 2026 Internal Hackathon | L.J. Institute of Engineering and Technology [C-433] | Problem Statement 2
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-Web%20App-FF4B4B.svg)
+![SIH 2026](https://img.shields.io/badge/SIH%202026-Problem%202-brightgreen.svg)
+
+> **SIH 2026 Internal Hackathon** | L.J. Institute of Engineering and Technology [C-433]  
+> **Domain:** AI / Media Forensics / Trust & Safety
 
 ---
 
-## 📋 Modules Built
+## 🌟 Why SignalScope?
+With text-to-image models generating photorealistic deepfakes in seconds, visual misinformation is at an all-time high. **SignalScope** is built for journalists, fact-checkers, and everyday users. It doesn't just give a "Real or Fake" verdict—it *explains* why, by highlighting visual inconsistencies (lighting, geometry) and detecting invisible generator fingerprints (SRM high-pass filtering).
+
+---
+
+## 👥 Meet The Team (Logic Legion)
+
+| Member | GitHub Username | Role / Contribution |
+| :--- | :--- | :--- |
+| **Aditya Parmar** | `@adityaparmar28` | **Frontend & MLOps Lead** (Built Streamlit UI & Integration) |
+| **Tapan** | `@tapansoni2007-dotcom` | **Core ML Lead** (Dual-Branch Architecture & Training) |
+| **Krina Malviya** | `@KrinaMalaviya` | **Data Engineering Lead** (Data Pipeline & SRM Filters) |
+| **Yuvraj** | `@YUXRAJ21` | **Explainability (XAI) Lead** (Grad-CAM Heatmaps & Text Gen) |
+| **Athul Nair** | `@athul2917-tech` | **Testing Lead** (Degradation Benchmarks & Robustness) |
+| **Pari Doshi** | `@paridoshi25` | **Docs & Analytics Lead** (Metrics, Reports & Repo Structure) |
+
+---
+
+## 📸 Application Screenshots
+
+*(Add screenshots of your application here before final submission)*
+
+<div align="center">
+  <img src="https://via.placeholder.com/400x250.png?text=Streamlit+UI+Dashboard" alt="UI Dashboard" width="45%">
+  <img src="https://via.placeholder.com/400x250.png?text=Grad-CAM+Heatmap+Output" alt="Grad-CAM Output" width="45%">
+</div>
+
+---
+
+## 📋 Modules Built (Core + Bonus)
 
 | Module | Status | Description |
 |--------|--------|-------------|
@@ -24,10 +59,15 @@
 
 ### Prerequisites
 - Python 3.10+
-- pip
+- Virtual Environment (recommended)
 
 ### 1. Install Dependencies
 ```bash
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install requirements
 pip install -r requirements.txt
 ```
 
@@ -40,9 +80,6 @@ python -m data.download_data --output_dir data --max_samples 60000
 ```bash
 # GPU (recommended)
 python -m src.model.train --data_dir data --epochs 15 --batch_size 32 --backbone efficientnet_b4
-
-# CPU (slower, reduce batch size)
-python -m src.model.train --data_dir data --epochs 10 --batch_size 16 --backbone efficientnet_b0
 ```
 
 ### 4. Run a Prediction
@@ -53,11 +90,6 @@ python -m src.model.predict --image path/to/image.jpg --model_dir model/weights
 ### 5. Launch ZeroGPT-Grade Web UI
 ```bash
 streamlit run app/app.py
-```
-
-### 6. Run Robustness Analysis
-```bash
-python src/degradation_benchmark.py
 ```
 
 > ⏱️ A judge should be able to reproduce a prediction in under 10 minutes by running steps 1, then 4.
@@ -85,14 +117,7 @@ python src/degradation_benchmark.py
 | **Unseen-Generator-Split AUC** | **0.9685 (96.85%)** | **0.9685 (96.85%)** |
 | **Macro-F1 Score** | **0.8461** | **0.9015** |
 | **Test Accuracy** | **84.65%** (1,235 / 1,459) | **90.75%** (1,324 / 1,459) |
-| **False Positive Rate (FPR)** | **2.24%** (only 15 misflagged real photos) | **4.48%** (30 misflagged real photos) |
-| **Calibration Temperature** | **1.1500** | **1.1500** |
-
-### Confusion Matrix Breakdown (Operating Threshold 0.65)
-- **True Real (TN)**: 654
-- **False Positive (FP)**: 15 *(Strictly controlled false alarm rate of 2.24%)*
-- **Missed Synthetic (FN)**: 209
-- **Detected Synthetic (TP)**: 581
+| **False Positive Rate (FPR)** | **2.24%** | **4.48%** |
 
 > 📊 Confusion matrix visualization: `report/confusion_matrices.png`  
 > 📈 ROC & Degradation curves: `report/evaluation_metrics.png`  
@@ -102,113 +127,38 @@ python src/degradation_benchmark.py
 
 ## 🏗️ Architecture Overview
 
-### Dual-Branch Architecture
-
-```
-Input Image (224×224)
-        │
-        ├──────────────────┐
-        ▼                  ▼
-┌─────────────────┐ ┌──────────────────┐
-│  Spatial Branch  │ │  Frequency Branch │
-│  EfficientNet-B4 │ │  SRM High-Pass    │
-│  (ImageNet pre-  │ │  Filters → CNN    │
-│   trained)       │ │  (3 SRM kernels)  │
-└────────┬────────┘ └────────┬─────────┘
-         │                   │
-         └────────┬──────────┘
-                  ▼
-         ┌──────────────┐
-         │ Feature Fusion│
-         │ FC → BN → ReLU│
-         │ → Dropout     │
-         └──────┬───────┘
-                │
-         ┌──────┴───────┐
-         ▼              ▼
-    ┌─────────┐  ┌────────────┐
-    │ Binary  │  │ Attribution│
-    │Classifier│  │   Head    │
-    │(real/AI) │  │(GAN/Diff) │
-    └────┬────┘  └───────────┘
-         ▼
-  Temperature Scaling
-         ▼
-  Calibrated Verdict
-         ▼
-  Grad-CAM Explainer
-         ▼
-    Streamlit UI
-```
-
 ### Why Dual-Branch?
-- **Spatial branch** (EfficientNet-B4): Detects visual artifacts — texture inconsistencies, geometry errors, lighting/shadow issues
-- **Frequency branch** (SRM filters): Detects spectral fingerprints left by generators — these are **generator-agnostic** and help generalize to unseen generators
-- **Feature fusion**: Combines both signal types for robust classification
+- **Spatial branch** (EfficientNet-B4): Detects visual artifacts — texture inconsistencies, geometry errors, lighting/shadow issues.
+- **Frequency branch** (SRM filters): Detects spectral fingerprints left by generators. These are **generator-agnostic** and help generalize to unseen generators.
+- **Feature fusion**: Combines both signal types for highly robust classification.
 
 ### Robustness & Calibration
-- **Training augmentation**: JPEG compression (q30-95), random resize/crop, Gaussian noise, brightness/contrast — simulates real-world degradation
-- **Temperature scaling**: Post-hoc calibration on validation set ensures confidence scores are honest and well-calibrated
-- **Backbone freezing**: First 3 epochs freeze EfficientNet backbone, then unfreeze with 10× lower LR — prevents catastrophic forgetting
+- **Training augmentation**: JPEG compression, random resize/crop, Gaussian noise — simulates real-world degradation.
+- **Temperature scaling**: Post-hoc calibration ensures confidence scores are honest (reduces overconfidence).
 
-### Explainability
-- **Grad-CAM**: Generates spatial heatmaps highlighting regions the model focuses on
-- **Template-based explanation**: Analyzes heatmap regions and generates faithful, hedged natural-language explanations
-- Explanations cite specific image regions and use probabilistic language ("likely", "suggests")
+### Explainability (XAI)
+- **Grad-CAM**: Generates spatial heatmaps highlighting the exact regions the model finds suspicious.
+- **Template-based explanation**: Analyzes regions and generates faithful, hedged natural-language explanations (e.g., "Likely AI due to texture artifacts in highlighted region").
 
 ---
 
 ## 🔒 Known Limitations
 
-1. **CIFAKE images are 32×32**: Low resolution limits fine-grained artifact detection. Models trained on higher-resolution datasets (GenImage, DiffusionDB) would perform better.
-2. **Unseen generators**: Performance may degrade on generators very different from training data (e.g., very new models).
-3. **Adversarial robustness**: The model has not been hardened against deliberate adversarial attacks.
-4. **Text in images**: The model does not specifically detect text rendering artifacts (a common AI tell).
-5. **Calibration drift**: Temperature scaling is calibrated on the validation set; distribution shift may affect calibration on novel data.
-
----
-
-## 📁 Repository Structure
-
-```
-signalscope/
-├── README.md                           # This file
-├── requirements.txt                    # Dependencies
-├── src/
-│   ├── model/
-│   │   ├── srm_filters.py             # SRM high-pass frequency filters
-│   │   ├── dual_branch_net.py         # Dual-branch architecture + TemperatureScaler
-│   │   ├── train.py                   # Training script with augmentation
-│   │   └── predict.py                 # Prediction interface (CLI + API)
-│   ├── explain/
-│   │   ├── gradcam.py                 # Grad-CAM heatmap generation
-│   │   └── explainer.py              # Faithful text explanation generator
-│   ├── robustness/
-│   │   └── degradation_test.py       # Robustness analysis under degradation
-│   └── app/
-│       └── streamlit_app.py          # Streamlit web interface
-├── model/
-│   └── weights/                       # Trained model weights
-├── data/
-│   └── download_data.py              # Dataset download script
-└── report/
-    └── model_report.md               # One-page model report
-```
+1. **Low-Res Training**: CIFAKE images are 32×32. Fine-grained artifact detection requires higher-resolution datasets.
+2. **Unseen generators**: Performance may degrade on fundamentally new architectures released post-training.
+3. **Adversarial attacks**: The model is not hardened against deliberate adversarial noise (e.g., FGSM).
 
 ---
 
 ## 🎬 Demo Video
 
-[Link to demo video — *to be added*]
+👉 **[Insert YouTube / Drive Demo Video Link Here]** 👈
 
 ---
 
 ## 📜 Originality Declaration
 
-- **Architecture**: Custom dual-branch design combining EfficientNet (from `timm` library) with SRM steganalysis filters
-- **Libraries**: PyTorch, timm, pytorch-grad-cam, albumentations, Streamlit, scikit-learn
-- **Pretrained weights**: EfficientNet-B4 pretrained on ImageNet (from `timm`)
-- **Dataset**: CIFAKE (MIT license)
-- **AI assistants**: Used for code scaffolding; the working system and evaluation are our own
-
-All third-party code is properly attributed. No public real-vs-fake notebooks were copied wholesale.
+- **Architecture**: Custom dual-branch design combining EfficientNet (from `timm` library) with SRM steganalysis filters.
+- **Libraries**: PyTorch, timm, pytorch-grad-cam, Streamlit.
+- **AI assistants**: Used strictly for code scaffolding and formatting; the working system, logic, and evaluation are entirely our own.
+- **Compliance**: We strictly adhere to the scope (No face-swap targeting, no real-world political figures). All data is MIT/Open source.

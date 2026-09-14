@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignalScope v2 - Media Authenticity & Deepfake Forensics</title>
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation / Header -->
+  <header>
+    <div class="header-inner">
+      <div class="brand-wrapper">
+        <span class="brand-icon">🔍</span>
+        <div>
+          <h1 class="brand-title">SignalScope <span style="font-size:0.8rem; background: var(--primary); color:#000; padding:2px 8px; border-radius:4px; font-weight:800;">v2.0 PRO</span></h1>
+          <p class="brand-subtitle">AI Media Forensics & Trust Verification Suite • Logic Legion</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+        <div id="header-status-badge" class="status-badge">
+          <span class="status-dot"></span> Checking Core Status...
+        </div>
+        <div class="theme-selector-wrapper">
+          <select id="theme-selector" class="theme-dropdown" aria-label="Select Theme Mode">
+            <option value="light">☀️ Light Mode</option>
+            <option value="system" selected>💻 System Default</option>
+            <option value="dark">🌙 Dark Mode</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tab-nav">
+    <div class="tabs-container">
+      <button class="tab-btn active" data-tab="tab-single">
+        <span>🔍</span> Single Image Forensics
+      </button>
+      <button class="tab-btn" data-tab="tab-batch">
+        <span>📁</span> Batch Scanner
+      </button>
+      <button class="tab-btn" data-tab="tab-robustness">
+        <span>🧪</span> Robustness Lab
+      </button>
+      <button class="tab-btn" data-tab="tab-arch">
+        <span>🏛️</span> Architecture & Status
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main>
+
+    <!-- ====================================================================
+         TAB 1: Single Image Forensics
+         ==================================================================== -->
+    <section id="tab-single" class="tab-content active">
+      <div class="section-header">
+        <h2 class="section-title"><span>🔍</span> Single Image Forensics</h2>
+        <p class="section-desc">Analyze images for synthetic generation fingerprints, frequency domain artifacts, and metadata provenance with microsecond response times.</p>
+      </div>
+
+      <!-- Upload Box -->
+      <div class="card">
+        <input type="file" id="single-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
+        <div id="single-dropzone" class="upload-dropzone">
+          <div class="upload-icon">📸</div>
+          <div class="upload-title">Drag & Drop Image Here to Inspect</div>
+          <div class="upload-hint">Supports JPEG, PNG, WebP • Zero upload lag with instant client-side preview</div>
+        </div>
+      </div>
+
+      <!-- Laser Scanner Preview -->
+      <div id="single-preview-wrapper" class="image-preview-wrapper" style="display:none; margin-bottom: 1.5rem;">
+        <div class="scan-laser"></div>
+        <img id="single-preview-img" alt="Scanning Preview">
+      </div>
+
+      <!-- Analysis Results -->
+      <div id="single-results" style="display:none;">
+
+        <!-- Verdict Banner -->
+        <div id="verdict-banner" class="verdict-banner">
+          <div>
+            <div id="verdict-heading" class="verdict-heading">🤖 Likely AI-Generated</div>
+            <div id="verdict-sub" class="verdict-sub">Operating Threshold: 0.50 (Balanced) | Forensic Confidence: 90.75%</div>
+          </div>
+          <div class="confidence-box">
+            <div class="confidence-label">
+              <span>Model Confidence</span>
+              <span id="confidence-pct">91.02%</span>
+            </div>
+            <div class="confidence-progress-bg">
+              <div id="confidence-fill" class="confidence-progress-fill fill-fake" style="width: 91.02%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evidence Cards Grid -->
+        <div class="evidence-grid">
+          <div class="evidence-card">
+            <div class="evidence-title">Model Signal 🤖</div>
+            <div id="ev-model-val" class="evidence-val">91.0%</div>
+            <div id="ev-model-desc" class="evidence-desc">Strong AI Signal</div>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-title">Frequency / SRM 🔬</div>
+            <div id="ev-srm-val" class="evidence-val">Artefacts Found</div>
+            <div id="ev-srm-desc" class="evidence-desc">High-Frequency Noise Residuals</div>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-title">Metadata & Provenance 🧬</div>
+            <div id="ev-meta-val" class="evidence-val">Clean / Missing</div>
+            <div id="ev-meta-desc" class="evidence-desc">EXIF & C2PA Validation</div>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-title">Inference Speed ⚡</div>
+            <div id="ev-perf-val" class="evidence-val">120 ms</div>
+            <div id="ev-perf-desc" class="evidence-desc">Ultra-low localhost latency</div>
+          </div>
+        </div>
+
+        <!-- Dual Inspection Columns -->
+        <div class="split-cols">
+          <!-- Left: Metadata & Provenance -->
+          <div class="card">
+            <h3 style="font-size:1.15rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <span>🧬</span> Metadata & Provenance Signatures
+            </h3>
+            <table class="forensic-table">
+              <tbody id="metadata-table-body">
+                <!-- Injected by JS -->
+              </tbody>
+            </table>
+            <div class="disclaimer-alert">
+              ⚠️ <strong>Trust & Safety Note:</strong> Outputs are likelihood assessments based on statistical noise patterns and visual artifacts. Never use as sole legal accusation.
+            </div>
+          </div>
+
+          <!-- Right: Grad-CAM Visual Attention Map -->
+          <div class="card">
+            <h3 style="font-size:1.15rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <span>🔬</span> Grad-CAM Attention Heatmap (XAI)
+            </h3>
+            <div style="border-radius:8px; overflow:hidden; border: 1px solid var(--border-color); background:#000;">
+              <img id="heatmap-overlay-img" style="width:100%; display:block;" alt="Grad-CAM Overlay">
+            </div>
+            
+            <div style="margin-top:1.25rem;">
+              <h4 style="font-size:0.95rem; color:var(--text-muted); margin-bottom:0.35rem;">🧠 AI Diagnostic Explanation:</h4>
+              <div id="ai-explanation-text" style="background:rgba(255,255,255,0.04); padding:0.85rem 1rem; border-radius:6px; font-size:0.9rem; line-height:1.45; border:1px solid var(--border-light);">
+                Loading explanation...
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         TAB 2: Batch Scanner
+         ==================================================================== -->
+    <section id="tab-batch" class="tab-content">
+      <div class="section-header">
+        <h2 class="section-title"><span>📁</span> High-Throughput Batch Scanner</h2>
+        <p class="section-desc">Rapidly process folders of images for automated trust-and-safety screening with exportable forensic audits.</p>
+      </div>
+
+      <div class="card">
+        <input type="file" id="batch-file-input" accept="image/*" multiple style="display:none;">
+        <div id="batch-dropzone" class="upload-dropzone">
+          <div class="upload-icon">📂</div>
+          <div class="upload-title">Drop Multiple Images to Batch Screen</div>
+          <div class="upload-hint">Select multiple images at once • Fast multi-tensor parallel inference</div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div id="batch-progress-wrapper" class="card" style="display:none; text-align:center; padding:2rem;">
+        <div style="font-size:1.1rem; font-weight:600; margin-bottom:0.5rem;">⚡ Scanning batch with PyTorch Engine...</div>
+        <div style="color:var(--text-muted); font-size:0.85rem;">Processing frequency artifacts and semantic signatures</div>
+      </div>
+
+      <!-- Results -->
+      <div id="batch-results" style="display:none;">
+        <div class="evidence-grid">
+          <div class="evidence-card">
+            <div class="evidence-title">Total Scanned 📑</div>
+            <div id="batch-total-scanned" class="evidence-val">0</div>
+            <div class="evidence-desc">Images processed</div>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-title">AI-Generated 🤖</div>
+            <div id="batch-ai-detected" class="evidence-val" style="color:#f87171;">0</div>
+            <div class="evidence-desc">Flagged for review</div>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-title">Authentic Real 📸</div>
+            <div id="batch-real-detected" class="evidence-val" style="color:#34d399;">0</div>
+            <div class="evidence-desc">Verified authentic</div>
+          </div>
+          <div class="evidence-card">
+            <div class="evidence-title">Batch Latency ⚡</div>
+            <div id="batch-time-taken" class="evidence-val">0 ms</div>
+            <div class="evidence-desc">Total execution time</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+            <h3 style="font-size:1.15rem;">Forensic Batch Audit Table</h3>
+            <button id="export-csv-btn" class="btn btn-primary">
+              <span>📥</span> Download Forensic Audit (CSV)
+            </button>
+          </div>
+
+          <table class="forensic-table">
+            <thead>
+              <tr>
+                <th>Filename</th>
+                <th>Verdict</th>
+                <th>Confidence</th>
+                <th>Evidence</th>
+                <th>Audit Status</th>
+              </tr>
+            </thead>
+            <tbody id="batch-table-body">
+              <!-- Injected by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         TAB 3: Robustness Lab
+         ==================================================================== -->
+    <section id="tab-robustness" class="tab-content">
+      <div class="section-header">
+        <h2 class="section-title"><span>🧪</span> Robustness & Degradation Lab</h2>
+        <p class="section-desc">Stress-test detector stability against real-world social media compressions, re-encodings, and downscaling.</p>
+      </div>
+
+      <div class="split-cols">
+        <!-- Controls -->
+        <div class="card">
+          <h3 style="font-size:1.15rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <span>⚙️</span> Stress-Test Configuration
+          </h3>
+
+          <input type="file" id="rob-file-input" accept="image/*" style="display:none;">
+          <div id="rob-dropzone" class="upload-dropzone" style="padding:1.5rem; margin-bottom:1.25rem;">
+            <div style="font-size:1.75rem;">🖼️</div>
+            <div style="font-size:0.95rem; font-weight:600;">Choose Image to Stress-Test</div>
+            <div id="rob-file-selected-name" style="font-size:0.8rem; color:var(--primary); margin-top:0.25rem;">No file selected</div>
+          </div>
+
+          <div class="slider-control">
+            <label class="slider-label">Transformation Type</label>
+            <select id="degradation-type-select" style="width:100%; padding:0.6rem; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; color:var(--text-main); font-size:0.9rem;">
+              <option value="JPEG Compression">JPEG Compression (Social Media Simulation)</option>
+              <option value="Gaussian Blur">Gaussian Blur (Anti-aliasing / Filter)</option>
+              <option value="Downscale">Downscale & Rescale (Thumbnail / Screen Capture)</option>
+            </select>
+          </div>
+
+          <div class="slider-control">
+            <div class="slider-label">
+              <span>Degradation Severity</span>
+              <span id="severity-val-label" style="color:var(--primary);">70</span>
+            </div>
+            <input id="severity-slider" type="range" min="10" max="100" value="70" class="slider-input">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">
+              <span>Heavy Degradation (10)</span>
+              <span>Mild Degradation (100)</span>
+            </div>
+          </div>
+
+          <button id="run-robustness-btn" class="btn btn-primary" style="width:100%; margin-top:0.5rem;" disabled>
+            <span>🧪</span> Run Stress Test
+          </button>
+        </div>
+
+        <!-- Stress Test Results -->
+        <div class="card">
+          <h3 style="font-size:1.15rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <span>🔬</span> Degradation vs Confidence Drift
+          </h3>
+
+          <div id="rob-results" style="display:none;">
+            <div style="border-radius:8px; overflow:hidden; border:1px solid var(--border-color); background:#000; margin-bottom:1rem;">
+              <img id="rob-degraded-img" style="width:100%; max-height:260px; object-fit:contain; display:block;" alt="Degraded Output">
+            </div>
+
+            <table class="forensic-table">
+              <tbody>
+                <tr>
+                  <td>Original Prediction</td>
+                  <td id="rob-orig-verdict"><strong>-</strong></td>
+                </tr>
+                <tr>
+                  <td>Degraded Prediction</td>
+                  <td id="rob-deg-verdict"><strong>-</strong></td>
+                </tr>
+                <tr>
+                  <td>Confidence Drift</td>
+                  <td id="rob-drift-val" style="color:var(--primary); font-weight:700;">-</td>
+                </tr>
+                <tr>
+                  <td>Stability Verdict</td>
+                  <td id="rob-stability-note">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="rob-placeholder" style="text-align:center; padding:3rem 1rem; color:var(--text-dim);">
+            Select an image and click "Run Stress Test" to measure model stability under adverse conditions.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         TAB 4: Architecture & Status
+         ==================================================================== -->
+    <section id="tab-arch" class="tab-content">
+      <div class="section-header">
+        <h2 class="section-title"><span>🏛️</span> Dual-Branch System Architecture & Official Metrics</h2>
+        <p class="section-desc">Technical breakdown of SignalScope's state-of-the-art spatial-frequency fusion network.</p>
+      </div>
+
+      <!-- Metrics Highlight -->
+      <div class="evidence-grid">
+        <div class="evidence-card">
+          <div class="evidence-title">Overall ROC-AUC 🎯</div>
+          <div id="arch-auc" class="evidence-val" style="color:var(--primary);">0.9711</div>
+          <div class="evidence-desc">97.11% Area Under Curve</div>
+        </div>
+        <div class="evidence-card">
+          <div class="evidence-title">Test Accuracy 📈</div>
+          <div id="arch-acc" class="evidence-val" style="color:#34d399;">91.02%</div>
+          <div class="evidence-desc">Exceeds 88% minimum criteria</div>
+        </div>
+        <div class="evidence-card">
+          <div class="evidence-title">Macro-F1 Score 📊</div>
+          <div id="arch-f1" class="evidence-val">0.9095</div>
+          <div class="evidence-desc">Balanced classification score</div>
+        </div>
+        <div class="evidence-card">
+          <div class="evidence-title">Hardware Device ⚡</div>
+          <div id="arch-device" class="evidence-val">CPU</div>
+          <div class="evidence-desc">Optimized inference engine</div>
+        </div>
+      </div>
+
+      <!-- Dual Branch Visual Breakdown -->
+      <div class="card">
+        <h3 style="font-size:1.2rem; margin-bottom:1rem;">🧬 Dual-Branch Fusion Architecture</h3>
+        <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:1.5rem;">
+          SignalScope utilizes a dual-pathway feature extractor that simultaneously inspects visible visual geometry and invisible micro-frequency noise residuals.
+        </p>
+
+        <div style="background:var(--bg-surface); padding:1.5rem; border-radius:8px; border:1px solid var(--border-color); font-family:var(--font-mono); font-size:0.88rem; line-height:1.7;">
+          <div style="color:var(--primary); font-weight:700;">[INPUT IMAGE: 3x224x224]</div>
+          <div style="padding-left:1.5rem; border-left:2px solid var(--border-light); margin:0.5rem 0;">
+            ├── <strong>Branch 1 (Spatial Semantics):</strong> EfficientNet-B0 Backbone (1,280 features)<br>
+            │   └── Captures macro-artifacts: unnatural textures, anatomical glitches, warped lighting.<br>
+            └── <strong>Branch 2 (High-Frequency SRM):</strong> Steganalysis Noise Filters (128 features)<br>
+                └── Extracts micro-noise fingerprints left by GAN and Diffusion latent decoders.
+          </div>
+          <div style="color:#34d399; font-weight:700;">[FEATURE FUSION LAYER: 1,408 features]</div>
+          <div style="padding-left:1.5rem; border-left:2px solid var(--border-light); margin:0.5rem 0;">
+            └── BatchNorm1d ➔ ReLU ➔ Dropout(0.3) ➔ Binary Classification Head
+          </div>
+          <div style="color:#0284c7; font-weight:700;">[TEMPERATURE CALIBRATION & OPERATING POINT: Threshold = <span id="arch-threshold">0.50</span>]</div>
+          <div style="padding-left:1.5rem; border-left:2px solid var(--border-light); margin:0.5rem 0;">
+            └── Produces honest, non-overconfident probability scores to prevent costly false accusations.
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Logic Legion Footer Info -->
+      <div class="card">
+        <h3 style="font-size:1.15rem; margin-bottom:0.75rem;">👥 Developed by Logic Legion (SIH 2026 Internal Hackathon)</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem;">
+          Aditya Parmar (Frontend & MLOps) • Tapan (Core ML Lead) • Krina Malviya (Data Engineering) • Yuvraj (XAI Lead) • Athul Nair (Testing Lead) • Pari Doshi (Docs & Analytics Lead)
+        </p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    SignalScope v2.0 • High-Speed AI Media Authenticity Suite • Built with HTML5, CSS3, JavaScript & FastAPI
+  </footer>
+
+  <script src="static/js/app.js"></script>
+</body>
+</html>
